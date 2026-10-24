@@ -6,9 +6,20 @@ create table if not exists public.profiles (
   state jsonb,
   updated_at timestamptz default now()
 );
+-- repair: older projects may have an older copy of this table
+alter table public.profiles add column if not exists handle text;
+alter table public.profiles add column if not exists niche text;
+alter table public.profiles add column if not exists tz text;
+alter table public.profiles add column if not exists gender text;
+alter table public.profiles add column if not exists pod_pref text;
+alter table public.profiles add column if not exists state jsonb;
+alter table public.profiles add column if not exists updated_at timestamptz default now();
 alter table public.profiles enable row level security;
+drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile"   on public.profiles for select using (auth.uid() = id);
+drop policy if exists "insert own profile" on public.profiles;
 create policy "insert own profile" on public.profiles for insert with check (auth.uid() = id);
+drop policy if exists "update own profile" on public.profiles;
 create policy "update own profile" on public.profiles for update using (auth.uid() = id);
 -- Auth > Providers > Email: turn OFF "Confirm email" (loQin signs up with a name and password, no email box).
 
@@ -25,6 +36,16 @@ create table if not exists public.pods (
   pinned text,
   created_at timestamptz default now()
 );
+-- repair: older projects may have an older copy of this table
+alter table public.pods add column if not exists name text;
+alter table public.pods add column if not exists niche text;
+alter table public.pods add column if not exists max_members int default 8;
+alter table public.pods add column if not exists invite_code text;
+alter table public.pods add column if not exists owner_id uuid;
+alter table public.pods add column if not exists approval boolean default false;
+alter table public.pods add column if not exists locked boolean default false;
+alter table public.pods add column if not exists pinned text;
+alter table public.pods add column if not exists created_at timestamptz default now();
 create table if not exists public.pod_members (
   pod_id uuid references public.pods(id) on delete cascade,
   user_id uuid references auth.users(id) on delete cascade,
@@ -32,15 +53,35 @@ create table if not exists public.pod_members (
   joined_at timestamptz default now(),
   primary key (pod_id, user_id)
 );
+-- repair: older projects may have an older copy of this table
+alter table public.pod_members add column if not exists pod_id uuid;
+alter table public.pod_members add column if not exists user_id uuid;
+alter table public.pod_members add column if not exists role text default 'member';
+alter table public.pod_members add column if not exists joined_at timestamptz default now();
+alter table public.pod_members add column if not exists handle text;
+do $$ begin
+  if not exists (select 1 from pg_constraint where conrelid = 'public.pod_members'::regclass and contype = 'p') then
+    delete from public.pod_members where pod_id is null or user_id is null;
+    delete from public.pod_members x using public.pod_members y where x.ctid < y.ctid and x.pod_id = y.pod_id and x.user_id = y.user_id;
+    alter table public.pod_members add primary key (pod_id, user_id);
+  end if;
+end $$;
 alter table public.pods enable row level security;
 alter table public.pod_members enable row level security;
 -- anyone signed in can look a group up by its code (needed to join); only the owner edits it
+drop policy if exists "pods readable" on public.pods;
 create policy "pods readable"      on public.pods for select using (true);
+drop policy if exists "pods insert own" on public.pods;
 create policy "pods insert own"    on public.pods for insert with check (auth.uid() = owner_id);
+drop policy if exists "pods update owner" on public.pods;
 create policy "pods update owner"  on public.pods for update using (auth.uid() = owner_id);
+drop policy if exists "pods delete owner" on public.pods;
 create policy "pods delete owner"  on public.pods for delete using (auth.uid() = owner_id);
+drop policy if exists "members readable" on public.pod_members;
 create policy "members readable"   on public.pod_members for select using (true);
+drop policy if exists "join as yourself" on public.pod_members;
 create policy "join as yourself"   on public.pod_members for insert with check (auth.uid() = user_id);
+drop policy if exists "leave as yourself" on public.pod_members;
 create policy "leave as yourself"  on public.pod_members for delete using (auth.uid() = user_id);
 -- NOTE: profiles.state holds each user's full app data, so profiles stay private to their owner.
 -- Until you add a public view of handles, a joiner sees the admin as "Admin" in the preview.
@@ -60,21 +101,48 @@ create table if not exists public.checkins (
   updated_at timestamptz default now(),
   unique (user_id, pod_id, day)
 );
+-- repair: older projects may have an older copy of this table (rows that cannot be used are removed)
+alter table public.checkins add column if not exists id uuid default gen_random_uuid();
+alter table public.checkins add column if not exists user_id uuid;
+alter table public.checkins add column if not exists pod_id uuid;
+alter table public.checkins add column if not exists day date;
+alter table public.checkins add column if not exists handle text;
+alter table public.checkins add column if not exists note text default '';
+alter table public.checkins add column if not exists link text default '';
+alter table public.checkins add column if not exists has_photo boolean default false;
+alter table public.checkins add column if not exists has_video boolean default false;
+alter table public.checkins add column if not exists streak int default 0;
+alter table public.checkins add column if not exists updated_at timestamptz default now();
+alter table public.checkins add column if not exists proof_url text;
+delete from public.checkins where day is null or pod_id is null or user_id is null;
+create unique index if not exists checkins_user_pod_day_uniq on public.checkins (user_id, pod_id, day);
+do $$ begin
+  if not exists (select 1 from pg_constraint where conrelid = 'public.checkins'::regclass and contype = 'p') then
+    update public.checkins set id = gen_random_uuid() where id is null;
+    alter table public.checkins add primary key (id);
+  end if;
+end $$;
 alter table public.checkins enable row level security;
 -- members of a group can see each other's lock-ins; you can only write your own, in groups you belong to
+drop policy if exists "members read checkins" on public.checkins;
 create policy "members read checkins" on public.checkins for select
   using (exists (select 1 from public.pod_members m where m.pod_id = checkins.pod_id and m.user_id = auth.uid()));
+drop policy if exists "write own checkin" on public.checkins;
 create policy "write own checkin" on public.checkins for insert
   with check (auth.uid() = user_id and exists (select 1 from public.pod_members m where m.pod_id = checkins.pod_id and m.user_id = auth.uid()));
+drop policy if exists "update own checkin" on public.checkins;
 create policy "update own checkin" on public.checkins for update using (auth.uid() = user_id);
 -- live updates across devices (optional; the app also refreshes every 30 seconds)
-alter publication supabase_realtime add table public.checkins;
+do $$ begin alter publication supabase_realtime add table public.checkins; exception when duplicate_object then null; end $$;
 
 -- ===== Proof uploads (step 4) =====
 alter table public.checkins add column if not exists proof_url text;
--- Storage: create a PUBLIC bucket named proof-media (Storage > New bucket > Public), then:
+-- Storage: the public bucket that holds photo/video proof (created for you here)
+insert into storage.buckets (id, name, public) values ('proof-media', 'proof-media', true) on conflict (id) do update set public = true;
+drop policy if exists "upload own proof" on storage.objects;
 create policy "upload own proof" on storage.objects for insert to authenticated
   with check (bucket_id = 'proof-media' and (storage.foldername(name))[1] = auth.uid()::text);
+drop policy if exists "read proof media" on storage.objects;
 create policy "read proof media" on storage.objects for select using (bucket_id = 'proof-media');
 
 -- ===== Comments & reactions (step 5) =====
@@ -89,8 +157,11 @@ CREATE TABLE IF NOT EXISTS public.checkin_reactions (
 );
 CREATE INDEX IF NOT EXISTS idx_checkin_reactions_checkin ON public.checkin_reactions(checkin_id);
 ALTER TABLE public.checkin_reactions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Authenticated users can view reactions" ON public.checkin_reactions;
 CREATE POLICY "Authenticated users can view reactions" ON public.checkin_reactions FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users can add their own reactions" ON public.checkin_reactions;
 CREATE POLICY "Users can add their own reactions" ON public.checkin_reactions FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can remove their own reactions" ON public.checkin_reactions;
 CREATE POLICY "Users can remove their own reactions" ON public.checkin_reactions FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 -- 2. Comments
@@ -103,16 +174,19 @@ CREATE TABLE IF NOT EXISTS public.checkin_comments (
 );
 CREATE INDEX IF NOT EXISTS idx_checkin_comments_checkin ON public.checkin_comments(checkin_id, created_at ASC);
 ALTER TABLE public.checkin_comments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Authenticated users can view comments" ON public.checkin_comments;
 CREATE POLICY "Authenticated users can view comments" ON public.checkin_comments FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users can post comments" ON public.checkin_comments;
 CREATE POLICY "Users can post comments" ON public.checkin_comments FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users can delete their own comments" ON public.checkin_comments;
 CREATE POLICY "Users can delete their own comments" ON public.checkin_comments FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
 -- 3. Extras the app uses
 -- shows the commenter's @name (profiles are private, so the name is stored with the comment)
 ALTER TABLE public.checkin_comments ADD COLUMN IF NOT EXISTS handle TEXT;
 -- live updates across devices (optional; the app also refreshes every 30 seconds)
-ALTER PUBLICATION supabase_realtime ADD TABLE public.checkin_reactions;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.checkin_comments;
+do $$ begin alter publication supabase_realtime add table public.checkin_reactions; exception when duplicate_object then null; end $$;
+do $$ begin alter publication supabase_realtime add table public.checkin_comments; exception when duplicate_object then null; end $$;
 
 
 -- =====================================================================
@@ -162,6 +236,7 @@ begin
   return new;
 end $$;
 
+drop trigger if exists trg_sync_user_streak on public.checkins;
 drop trigger if exists trg_sync_user_streak on public.checkins;
 create trigger trg_sync_user_streak after insert or update on public.checkins
 for each row execute function public.sync_user_streak();
@@ -738,4 +813,24 @@ grant execute on function public.set_member_role(uuid, uuid, text) to authentica
 do $$ begin
   begin alter publication supabase_realtime add table public.reports;         exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.member_warnings; exception when duplicate_object then null; end;
+end $$;
+
+
+-- =====================================================================
+-- EMAIL ACCOUNTS (run this whole section once in the Supabase SQL Editor)
+-- Lets the sign-up screen check that a name is free, and stops two people
+-- having the same name that only differs by upper/lower case.
+-- =====================================================================
+create or replace function public.handle_available(p_handle text) returns boolean
+language sql security definer set search_path = public stable as $$
+  select not exists (select 1 from public.profiles where lower(handle) = lower(trim(p_handle)));
+$$;
+revoke all on function public.handle_available(text) from public;
+grant execute on function public.handle_available(text) to anon, authenticated;
+
+do $$
+begin
+  create unique index if not exists profiles_handle_lower_idx on public.profiles (lower(handle));
+exception when unique_violation then
+  raise notice 'Two existing accounts have the same name apart from capital letters. The extra name check was skipped; sign-up still works.';
 end $$;

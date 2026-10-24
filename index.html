@@ -346,14 +346,16 @@ button.bg-cobalt:hover { filter: brightness(1.08); }
     <!-- LOG IN -->
     <form id="loginForm" class="px-6 py-5 space-y-4">
       <div>
-        <label for="loginHandle" class="block text-sm font-medium text-slate-300 mb-1.5">Your name</label>
-        <input id="loginHandle" type="text" required autocomplete="username" placeholder="@YourName" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" />
+        <label for="loginHandle" class="block text-sm font-medium text-slate-300 mb-1.5">Email or name</label>
+        <input id="loginHandle" type="text" required autocomplete="username" placeholder="you@email.com" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" />
       </div>
       <div>
         <label for="loginPass" class="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
         <input id="loginPass" type="password" required autocomplete="current-password" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:border-cobalt" />
+        <button type="button" id="forgotLink" class="mt-2 text-xs text-cobalt hover:underline">Forgot password?</button>
       </div>
       <p id="loginError" class="hidden text-xs text-crimson border border-crimson/60 bg-crimson/10 rounded-lg px-3 py-2"></p>
+      <p id="loginNote" class="hidden text-xs text-cobalt border border-cobalt/60 bg-cobalt/10 rounded-lg px-3 py-2"></p>
       <button type="submit" class="btn-press w-full bg-cobalt hover:brightness-110 text-onacc font-display font-bold text-sm rounded-lg py-3">Log in</button>
     </form>
 
@@ -364,8 +366,17 @@ button.bg-cobalt:hover { filter: brightness(1.08); }
         <input id="handleInput" type="text" required maxlength="24" placeholder="@YourName" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" />
       </div>
       <div>
+        <label for="emailInput" class="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+        <input id="emailInput" type="email" maxlength="120" autocomplete="email" placeholder="you@email.com" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" />
+        <p class="text-[11px] text-slate-500 mt-1">Used to log in and to reset your password. We never show it to anyone.</p>
+      </div>
+      <div>
         <label for="passInput" class="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
-        <input id="passInput" type="password" required minlength="4" autocomplete="new-password" placeholder="At least 4 characters" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" />
+        <input id="passInput" type="password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" />
+      </div>
+      <div>
+        <label for="confirmInput" class="block text-sm font-medium text-slate-300 mb-1.5">Confirm password</label>
+        <input id="confirmInput" type="password" autocomplete="new-password" placeholder="Type it again" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" />
       </div>
       <details class="pf-more rounded-lg border border-slate-700 bg-obsidian/40">
         <summary class="flex items-center justify-between px-3.5 py-3 text-sm font-semibold text-slate-200"><span>More about you <span class="text-xs text-slate-400 font-normal">(optional, you can skip)</span></span><span class="chev text-slate-400">▾</span></summary>
@@ -396,6 +407,7 @@ button.bg-cobalt:hover { filter: brightness(1.08); }
           <span>I agree to the group rules. <button type="button" id="readRulesLink" class="text-cobalt hover:underline">Read them</button></span>
         </label>
       </div>
+      <p id="signupNote" class="hidden text-xs text-cobalt border border-cobalt/60 bg-cobalt/10 rounded-lg px-3 py-2"></p>
       <p id="signupError" class="hidden text-xs text-crimson border border-crimson/60 bg-crimson/10 rounded-lg px-3 py-2"></p>
       <button type="submit" class="btn-press w-full bg-cobalt hover:brightness-110 text-onacc font-display font-bold text-sm rounded-lg py-3">Create account</button>
     </form>
@@ -672,6 +684,11 @@ button.bg-cobalt:hover { filter: brightness(1.08); }
     <div class="p-5 space-y-4 text-sm">
       <div class="flex items-center justify-between"><span class="text-slate-400">Name</span><span id="pfHandle" class="font-display font-bold text-white"></span></div>
       <div class="flex items-center justify-between"><span class="text-slate-400">What I do</span><span id="pfNiche" class="text-white"></span></div>
+      <div id="pfAcct" class="hidden rounded-lg border border-slate-700 bg-obsidian/40 p-3 space-y-2">
+        <div class="flex items-center justify-between gap-2"><span class="text-slate-400">Email</span><span id="pfEmail" class="text-white text-xs truncate"></span></div>
+        <p id="pfEmailHint" class="hidden text-[11px] text-amber">Add an email so you can reset your password if you forget it.</p>
+        <div class="flex gap-2"><input id="pfNewEmail" type="email" maxlength="120" placeholder="new@email.com" autocomplete="email" class="flex-1 min-w-0 bg-obsidian border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-cobalt" /><button id="pfEmailBtn" type="button" class="btn-press text-xs font-semibold rounded-lg px-3 border border-slate-600 text-slate-200 hover:border-cobalt hover:text-cobalt">Save email</button></div>
+      </div>
       <div>
         <label for="pfTz" class="block text-slate-400 mb-1.5">Time zone</label>
         <select id="pfTz" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white focus:border-cobalt"></select>
@@ -756,6 +773,36 @@ button.bg-cobalt:hover { filter: brightness(1.08); }
       <textarea id="rpDetails" maxlength="500" rows="2" placeholder="Anything the admin should know? (optional)" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-cobalt"></textarea>
       <label id="rpBlockWrap" class="flex items-center gap-2.5 text-xs text-slate-300 cursor-pointer pt-1"><input id="rpBlock" type="checkbox" class="accent-cobalt" /> Also block this member (hide their messages from me)</label>
       <button type="submit" class="btn-press w-full bg-crimson hover:bg-rose-500 text-onacc font-display font-bold rounded-lg py-2.5">Send report</button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= FORGOT / RESET PASSWORD ================= -->
+<div id="forgotModal" class="hidden fixed inset-0 z-[75] modal-backdrop items-center justify-center p-4">
+  <div class="pop w-full max-w-sm bg-charcoal border border-slate-700 rounded-2xl shadow-2xl">
+    <div class="px-5 py-4 border-b border-slate-700/60 flex items-center justify-between">
+      <div><p class="font-display font-bold text-white">Reset your password</p><p class="text-xs text-slate-400 mt-0.5">We will email you a link to choose a new one.</p></div>
+      <button data-close="forgotModal" class="text-slate-400 hover:text-white text-2xl leading-none" aria-label="Close">&times;</button>
+    </div>
+    <form id="forgotForm" class="p-5 space-y-3 text-sm">
+      <div><label for="forgotEmail" class="block text-slate-300 mb-1.5">Email</label>
+      <input id="forgotEmail" type="email" required autocomplete="email" placeholder="you@email.com" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" /></div>
+      <p id="forgotMsg" class="hidden text-xs rounded-lg px-3 py-2"></p>
+      <button type="submit" class="btn-press w-full bg-cobalt hover:brightness-110 text-onacc font-display font-bold rounded-lg py-2.5">Send reset link</button>
+      <p class="text-[11px] text-slate-500">Signed up before email was added? Log in with your name, then add an email under Profile.</p>
+    </form>
+  </div>
+</div>
+<div id="resetModal" class="hidden fixed inset-0 z-[76] modal-backdrop items-center justify-center p-4">
+  <div class="pop w-full max-w-sm bg-charcoal border border-slate-700 rounded-2xl shadow-2xl">
+    <div class="px-5 py-4 border-b border-slate-700/60"><p class="font-display font-bold text-white">Choose a new password</p><p class="text-xs text-slate-400 mt-0.5">Then you are logged straight in.</p></div>
+    <form id="resetForm" class="p-5 space-y-3 text-sm">
+      <div><label for="resetPass" class="block text-slate-300 mb-1.5">New password</label>
+      <input id="resetPass" type="password" required minlength="6" autocomplete="new-password" placeholder="At least 6 characters" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" /></div>
+      <div><label for="resetPass2" class="block text-slate-300 mb-1.5">Confirm new password</label>
+      <input id="resetPass2" type="password" required autocomplete="new-password" placeholder="Type it again" class="w-full bg-obsidian border border-slate-700 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cobalt" /></div>
+      <p id="resetErr" class="hidden text-xs text-crimson border border-crimson/60 bg-crimson/10 rounded-lg px-3 py-2"></p>
+      <button type="submit" class="btn-press w-full bg-cobalt hover:brightness-110 text-onacc font-display font-bold rounded-lg py-2.5">Save new password</button>
     </form>
   </div>
 </div>
@@ -978,7 +1025,9 @@ const SUPABASE_URL = 'https://nacxbnovmbdrhfuqtwyw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hY3hibm92bWJkcmhmdXF0d3l3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1MzM3NzIsImV4cCI6MjEwODEwOTc3Mn0.Bq9uRApcnTOvxaCHOxGqS7yPD-XDKaH6dQIi9ReNWrI';
 let sb = null;
 try { if (window.supabase && window.supabase.createClient) sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); } catch (e) { sb = null; }
-let sbUid = null, syncTimer = null;
+let sbUid = null, syncTimer = null, authEmail = '';
+const RECOVERY = /type=recovery/.test(location.hash);
+if (sb && sb.auth && sb.auth.onAuthStateChange) { try { sb.auth.onAuthStateChange(ev => { if (ev === 'PASSWORD_RECOVERY') setTimeout(() => { if (typeof openModal === 'function') openModal('resetModal'); }, 0); }); } catch (e) { } }
 const AUTH_DOMAIN = 'loqin.app'; // the sign-up form has no email box, so each @name maps to name@loqin.app
 const emailOf = h => String(h).replace(/^@/, '').toLowerCase().replace(/[^a-z0-9._-]/g, '_') + '@' + AUTH_DOMAIN;
 const profileRow = () => ({ id: sbUid, handle: state.you.handle, niche: state.you.niche, tz: state.you.tz, gender: state.you.gender, pod_pref: state.you.podPref, state: stateSnap(), updated_at: new Date().toISOString() });
@@ -1358,12 +1407,13 @@ async function loadProfile(user, handle, pass) {
   sbUid = user.id;
   let row = null;
   try { const r = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle(); row = r.data; } catch (e) { row = null; }
-  const d = readDb(), k = keyOf(handle);
+  const d = readDb(), k = keyOf(handle), md = user.user_metadata || {}; let isNew = false; authEmail = user.email || '';
   if (row && row.state && row.state.you) d[k] = { pw: pass ? hashPw(pass) : (d[k] && d[k].pw) || null, state: row.state, v: 6 };
-  else if (!d[k]) d[k] = { pw: pass ? hashPw(pass) : null, state: newState({ handle: row && row.handle || handle, niche: row && row.niche || 'builder', tz: row && row.tz || TIMEZONES[0], gender: row && row.gender || 'Not set', podPref: row && row.pod_pref || 'Open to Anyone' }), v: 6 };
+  else if (!d[k]) { isNew = !row; d[k] = { pw: pass ? hashPw(pass) : null, state: newState({ handle: row && row.handle || handle, niche: row && row.niche || (NICHES[md.niche] ? md.niche : 'builder'), tz: row && row.tz || (TIMEZONES.includes(md.tz) ? md.tz : TIMEZONES[0]), gender: row && row.gender || 'Not set', podPref: row && row.pod_pref || 'Open to Anyone' }), v: 6 }; }
   try { await syncPods(d[k].state); } catch (e) { }
   await checkAdmin();
   writeDb(d);
+  return isNew;
 }
 
 /* =================================================================
@@ -2322,7 +2372,7 @@ function renderChat(force) {
   let html = '';
   if (!o) {
     html = `<div class="h-full flex items-center justify-center"><div class="text-center max-w-sm mx-auto py-10"><p class="text-5xl mb-3">${ic('users', 'lg')}</p><p class="font-display font-bold text-white text-lg">Start with your people</p><p class="text-sm text-slate-400 mt-1.5 leading-relaxed">Make a private group for your friends, family or team. Lock in daily, chat, and keep each other going.</p>
-      <div class="mt-5 space-y-2"><button data-empty="create" class="btn-press w-full bg-cobalt text-onacc font-display font-bold text-sm rounded-lg py-2.5">${ic('plus', 'mr sm')}New private group</button><button data-empty="join" class="btn-press w-full border border-slate-600 hover:border-cobalt hover:text-cobalt text-slate-200 font-semibold text-sm rounded-lg py-2.5">Join with a code</button><button data-empty="match" class="btn-press w-full border border-dashed border-slate-600 hover:border-amber hover:text-amber text-slate-300 text-xs font-semibold rounded-lg py-2">Match me with a public group instead</button></div></div></div>`;
+      <div class="mt-5 space-y-2"><button data-empty="create" class="btn-press w-full bg-cobalt text-onacc font-display font-bold text-sm rounded-lg py-2.5">${ic('plus', 'mr sm')}New private group</button><button data-empty="join" class="btn-press w-full border border-slate-600 hover:border-cobalt hover:text-cobalt text-slate-200 font-semibold text-sm rounded-lg py-2.5">Join with a code</button></div></div></div>`;
   } else {
     let lastD = null;
     (state.chats[key] || []).forEach(m => {
@@ -2380,7 +2430,7 @@ $('chatSafety').onclick = () => openSafety();
 /* =================================================================
    GROUPS, INVITES, SAFETY
 ================================================================= */
-const MODAL_IDS = ['proofModal', 'checkinModal', 'rulesModal', 'profileModal', 'createModal', 'joinModal', 'safetyModal', 'reportModal', 'modModal', 'themeModal', 'startModal', 'inviteModal'];
+const MODAL_IDS = ['proofModal', 'checkinModal', 'rulesModal', 'profileModal', 'createModal', 'joinModal', 'safetyModal', 'reportModal', 'modModal', 'forgotModal', 'resetModal', 'themeModal', 'startModal', 'inviteModal'];
 let reportTarget = null, joinFound = null;
 
 const RX_BADLINK = /(bit\.ly|tinyurl|t\.me|wa\.me|discord\.gg|linktr\.ee|rb\.gy|cutt\.ly|chat\.whatsapp\.com|whatsapp\.com\/(send|invite))/i;
@@ -2815,6 +2865,7 @@ $('profileBtn').onclick = () => {
   const y = state.you; pfAvSel = y.avatar || ''; renderPfAv();
   $('pfHandle').textContent = y.handle; $('pfNiche').textContent = NICHES[y.niche].short;
   $('pfTz').value = y.tz;
+  { const on = !!(sb && sbUid && authEmail), legacy = /@loqin\.app$/i.test(authEmail); $('pfAcct').classList.toggle('hidden', !on); $('pfEmail').textContent = legacy ? 'Not added yet' : authEmail; $('pfEmailHint').classList.toggle('hidden', !legacy); }
   openModal('profileModal');
 };
 $('pfSave').onclick = () => {
@@ -2834,18 +2885,33 @@ $('tabLogin').onclick = () => setTab('login'); $('tabSignup').onclick = () => se
 const normHandle = h => { h = h.trim().replace(/\s+/g, '_'); return h.startsWith('@') ? h : '@' + h; };
 const showErr = (id, msg) => { const e = $(id); e.textContent = msg; e.classList.remove('hidden'); };
 
+const looksEmail = v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
+const note = (id, msg) => { const e = $(id); e.textContent = msg; e.classList.remove('hidden'); };
+async function handleFor(user, h) {
+  if (h) return h;
+  let row = null; try { const r = await sb.from('profiles').select('handle').eq('id', user.id).maybeSingle(); row = r && r.data; } catch (e) { }
+  return normHandle((row && row.handle) || (user.user_metadata && user.user_metadata.handle) || String(user.email || 'member').split('@')[0]);
+}
+const authMsg = (err, fallback) => { const m = (err && err.message) || ''; return /network|fetch/i.test(m) ? 'Cannot reach the server. Check your connection.' : /not confirmed/i.test(m) ? 'Please confirm your email first. Open the link we sent you, then log in.' : /rate|too many|seconds/i.test(m) ? 'Too many tries. Please wait a few minutes and try again.' : fallback; };
+
 $('loginForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const h = normHandle($('loginHandle').value), pass = $('loginPass').value;
+  $('loginNote').classList.add('hidden');
+  const raw = $('loginHandle').value.trim(), pass = $('loginPass').value, isEmail = looksEmail(raw), h = isEmail ? null : normHandle(raw);
   if (sb) {
-    let res; try { res = await sb.auth.signInWithPassword({ email: emailOf(h), password: pass }); } catch (err) { res = { error: { message: 'network' } }; }
-    if (!res.error && res.data && res.data.user) { await loadProfile(res.data.user, h, pass); $('loginError').classList.add('hidden'); startSession(keyOf(h), false); return; }
+    let res; try { res = await sb.auth.signInWithPassword({ email: isEmail ? raw.toLowerCase() : emailOf(h), password: pass }); } catch (err) { res = { error: { message: 'network' } }; }
+    if (!res.error && res.data && res.data.user) {
+      const hh = await handleFor(res.data.user, h), fresh = await loadProfile(res.data.user, hh, pass);
+      $('loginError').classList.add('hidden'); startSession(keyOf(hh), !!fresh); return;
+    }
+    if (isEmail) { showErr('loginError', authMsg(res.error, 'Wrong email or password. Try again, or use Forgot password.')); return; }
     const la = readDb()[keyOf(h)];
-    if (!(la && la.pw !== null && la.pw === hashPw(pass))) { showErr('loginError', res.error && /network|fetch/i.test(res.error.message) ? 'Cannot reach the server. Check your connection.' : 'Wrong name or password. Try again.'); return; }
+    if (!(la && la.pw !== null && la.pw === hashPw(pass))) { showErr('loginError', authMsg(res.error, 'Wrong name or password. If you signed up with an email, log in with that email.')); return; }
     // older on-device account: let it in, and copy it to the server in the background
-    try { const su = await sb.auth.signUp({ email: emailOf(h), password: pass, options: { data: { handle: h } } }); if (su.data && su.data.session) { sbUid = su.data.user.id; pushProfile(); syncPods(state); } } catch (err) { /* stay local */ }
+    try { const su = await sb.auth.signUp({ email: emailOf(h), password: pass, options: { data: { handle: h } } }); if (su.data && su.data.session) { sbUid = su.data.user.id; authEmail = su.data.user.email || ''; pushProfile(); syncPods(state); } } catch (err) { /* stay local */ }
     $('loginError').classList.add('hidden'); startSession(keyOf(h), false); return;
   }
+  if (isEmail) { showErr('loginError', 'Email login needs a connection to the server. Try again when you are online.'); return; }
   const d = readDb(), acc = d[keyOf(h)];
   if (!acc) { showErr('loginError', `No account found for ${h}. Use Create account to get started.`); return; }
   if (acc.pw === null) { showErr('loginError', 'This account has no password yet. Open it on the device you joined from and tap "Save your progress".'); return; }
@@ -2855,23 +2921,76 @@ $('loginForm').addEventListener('submit', async e => {
 
 $('onboardingForm').addEventListener('submit', async e => {
   e.preventDefault();
-  const handle = normHandle($('handleInput').value), d = readDb(), k = keyOf(handle);
+  $('signupError').classList.add('hidden'); $('signupNote').classList.add('hidden');
+  const handle = normHandle($('handleInput').value), d = readDb(), k = keyOf(handle), email = $('emailInput').value.trim().toLowerCase(), pass = $('passInput').value, conf = $('confirmInput').value;
   if (d[k]) { showErr('signupError', `${handle} is taken. Log in instead, or pick another name.`); return; }
+  if (sb && !looksEmail(email)) { showErr('signupError', 'Enter a valid email address. We use it to log you in and to reset your password.'); return; }
+  if (pass.length < 6) { showErr('signupError', 'Use at least 6 characters for your password.'); return; }
+  if ((sb || conf) && pass !== conf) { showErr('signupError', 'The two passwords do not match. Type the same password in both boxes.'); return; }
   let newUser = null;
   if (sb) {
-    let res; try { res = await sb.auth.signUp({ email: emailOf(handle), password: $('passInput').value, options: { data: { handle } } }); } catch (err) { res = { error: { message: 'network' } }; }
-    if (res.error) { showErr('signupError', /already|registered|exists/i.test(res.error.message) ? `${handle} is taken. Log in instead, or pick another name.` : /network|fetch/i.test(res.error.message) ? 'Cannot reach the server. Check your connection.' : res.error.message); return; }
-    if (!res.data.session) { showErr('signupError', 'Account created, but the server wants an email confirmation first. Turn off "Confirm email" in Supabase Auth settings, then log in.'); return; }
-    newUser = res.data.user;
+    try { const av = await sb.rpc('handle_available', { p_handle: handle }); if (av && !av.error && av.data === false) { showErr('signupError', `${handle} is taken. Pick another name.`); return; } } catch (err) { /* check not installed yet: the database still protects names */ }
+    let res; try { res = await sb.auth.signUp({ email, password: pass, options: { data: { handle, niche: $('nicheSelect').value, tz: $('tzSelect').value }, emailRedirectTo: location.origin + location.pathname } }); } catch (err) { res = { error: { message: 'network' } }; }
+    if (res.error) { showErr('signupError', /already|registered|exists/i.test(res.error.message) ? 'That email already has an account. Log in instead, or use Forgot password.' : authMsg(res.error, res.error.message)); return; }
+    if (res.data && res.data.user && Array.isArray(res.data.user.identities) && res.data.user.identities.length === 0) { showErr('signupError', 'That email already has an account. Log in instead, or use Forgot password.'); return; }
+    if (!res.data.session) {
+      setTab('login'); $('loginHandle').value = email; $('loginPass').value = '';
+      note('loginNote', `Almost done. We sent a confirmation link to ${email}. Open it, then log in here.`); return;
+    }
+    newUser = res.data.user; authEmail = newUser.email || email;
   }
   const profile = { handle, niche: $('nicheSelect').value, tz: $('tzSelect').value,
     gender: (document.querySelector('input[name="gender"]:checked') || {}).value || 'Not set', podPref: 'Open to Anyone' };
-  d[k] = { pw: hashPw($('passInput').value), state: newState(profile), v: 6 }; writeDb(d);
-  $('signupError').classList.add('hidden');
+  d[k] = { pw: hashPw(pass), state: newState(profile), v: 6 }; writeDb(d);
   if (newUser) sbUid = newUser.id;
   startSession(k, true);
   if (newUser) pushProfile();
 });
+
+/* ---------- Forgot password, reset link, email on the account ---------- */
+$('forgotLink').onclick = () => { const v = $('loginHandle').value.trim(); $('forgotEmail').value = looksEmail(v) ? v : ''; $('forgotMsg').classList.add('hidden'); openModal('forgotModal'); };
+$('forgotForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const m = $('forgotMsg'), email = $('forgotEmail').value.trim().toLowerCase();
+  const say = (t, bad) => { m.textContent = t; m.className = 'text-xs rounded-lg px-3 py-2 border ' + (bad ? 'text-crimson border-crimson/60 bg-crimson/10' : 'text-cobalt border-cobalt/60 bg-cobalt/10'); };
+  if (!sb || !sb.auth || !sb.auth.resetPasswordForEmail) { say('Password reset needs a connection to the server.', true); return; }
+  let r; try { r = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); } catch (err) { r = { error: { message: 'network' } }; }
+  if (r && r.error) { say(authMsg(r.error, 'Could not send the email right now. Try again in a few minutes.'), true); return; }
+  say('If an account exists for that email, a reset link is on its way. Check your inbox and spam folder.', false);
+});
+$('resetForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const p1 = $('resetPass').value, p2 = $('resetPass2').value, er = $('resetErr');
+  const bad = t => { er.textContent = t; er.classList.remove('hidden'); };
+  if (p1.length < 6) { bad('Use at least 6 characters.'); return; }
+  if (p1 !== p2) { bad('The two passwords do not match.'); return; }
+  let r; try { r = await sb.auth.updateUser({ password: p1 }); } catch (err) { r = { error: { message: 'network' } }; }
+  if (!r || r.error || !r.data || !r.data.user) { bad(r && r.error && /same|different/i.test(r.error.message || '') ? 'Choose a password you have not used before.' : (r && r.error && /expired|session|missing/i.test(r.error.message || '') ? 'This link has expired. Request a new reset email.' : 'Could not save the new password. Try again.')); return; }
+  er.classList.add('hidden'); $('resetPass').value = ''; $('resetPass2').value = '';
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (err) { }
+  const user = r.data.user, hh = await handleFor(user, null), fresh = await loadProfile(user, hh, p1);
+  closeModal('resetModal'); startSession(keyOf(hh), !!fresh); toast('Password changed. You are logged in');
+});
+$('pfEmailBtn').onclick = async () => {
+  const v = $('pfNewEmail').value.trim().toLowerCase();
+  if (!looksEmail(v)) { toast('Enter a valid email address'); return; }
+  if (!sb || !sbUid) { toast('You need to be online to change your email'); return; }
+  let r; try { r = await sb.auth.updateUser({ email: v }, { emailRedirectTo: location.origin + location.pathname }); } catch (err) { r = { error: { message: 'network' } }; }
+  if (r && r.error) { toast(authMsg(r.error, /already|registered/i.test(r.error.message || '') ? 'That email is already used by another account' : 'Could not save the email. Try again')); return; }
+  $('pfNewEmail').value = ''; toast(`We sent a confirmation link to ${v}. Open it to finish`);
+};
+// Stay logged in: if Supabase still has a session, go straight back into the app.
+(async function restoreSession() {
+  if (!sb || !sb.auth || !sb.auth.getSession) return;
+  let r; try { r = await sb.auth.getSession(); } catch (e) { return; }
+  const u = r && r.data && r.data.session && r.data.session.user; if (!u || state) return;
+  if (RECOVERY) { openModal('resetModal'); return; }
+  try {
+    const hh = await handleFor(u, null), fresh = await loadProfile(u, hh, null);
+    if (state) return;
+    closeModal('inviteLanding'); startSession(keyOf(hh), !!fresh);
+  } catch (e) { /* stay on the login screen */ }
+})();
 
 /* =================================================================
    V7: MAGIC LINKS, AUTO-DRAFTS, REST DAYS + SHIELDS, RANKS, SOCIAL NUDGES
